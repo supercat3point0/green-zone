@@ -1,0 +1,15 @@
+<component name="libraryTable">
+  <library name="lwjg">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/lib/lwjgl/joml-1.10.5.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/lwjgl/lwjgl-assimp.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/lwjgl/lwjgl-glfw.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/lwjgl/lwjgl-openal.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/lwjgl/lwjgl-opengl.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/lwjgl/lwjgl-stb.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/lwjgl/lwjgl.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
