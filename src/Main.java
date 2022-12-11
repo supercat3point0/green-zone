@@ -11,6 +11,9 @@ import static org.lwjgl.system.MemoryUtil.NULL;
 
 public class Main {
   private static final GLFWErrorCallback errorCallback = GLFWErrorCallback.createPrint(System.err);
+  private static long window, lastLoopTime;
+  private static IntBuffer width, height;
+  private static float rotation = 0f;
 
   private static final GLFWKeyCallback keyCallback = new GLFWKeyCallback() {
     @Override
@@ -19,10 +22,8 @@ public class Main {
     }
   };
 
-  public static void main(String[] args) {
-    long window;
+  private static void init() {
     GLFWVidMode vidMode;
-    IntBuffer width, height;
 
     glfwSetErrorCallback(errorCallback);
 
@@ -48,48 +49,58 @@ public class Main {
     width = MemoryUtil.memAllocInt(1);
     height = MemoryUtil.memAllocInt(1);
 
-    while (!glfwWindowShouldClose(window)) {
-      float ratio;
+    lastLoopTime = System.nanoTime();
+  }
 
-      glfwGetFramebufferSize(window, width, height);
-      ratio = width.get() / (float) height.get();
+  private static void input() {}
 
-      width.rewind();
-      height.rewind();
+  private static void update(float delta) {
+    rotation += delta * 50f;
+    rotation %= 360f;
+  }
 
-      glViewport(0, 0, width.get(), height.get());
-      glClear(GL_COLOR_BUFFER_BIT);
+  private static void draw() {
+    float ratio;
 
-      glMatrixMode(GL_PROJECTION);
-      glLoadIdentity();
-      glOrtho(-ratio, ratio, -1f, 1f, 1f, -1f);
-      glMatrixMode(GL_MODELVIEW);
+    glfwGetFramebufferSize(window, width, height);
+    ratio = width.get() / (float) height.get();
+    width.rewind();
+    height.rewind();
 
-      glLoadIdentity();
-      glRotatef((float) glfwGetTime() * 50f, 0f, 0f, 1f);
+    glViewport(0, 0, width.get(), height.get());
+    glClear(GL_COLOR_BUFFER_BIT);
 
-      glBegin(GL_TRIANGLES);
-      glColor3f(0f, 0f, 0f);
-      glVertex3f(-0.5f, 0.5f, 0f);
-      glColor3f(0f, 0f, 1f);
-      glVertex3f(-0.5f, -0.5f, 0f);
-      glColor3f(0f, 1f, 1f);
-      glVertex3f(0.5f, -0.5f, 0f);
-      glColor3f(0f, 1f, 1f);
-      glVertex3f(0.5f, -0.5f, 0f);
-      glColor3f(0f, 1f, 0f);
-      glVertex3f(0.5f, 0.5f, 0f);
-      glColor3f(0f, 0f, 0f);
-      glVertex3f(-0.5f, 0.5f, 0f);
-      glEnd();
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    glOrtho(-ratio, ratio, -1f, 1f, -1f, 1f);
 
-      glfwSwapBuffers(window);
-      glfwPollEvents();
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+    glRotatef(rotation, 0f, 0f, 1f);
 
-      width.flip();
-      height.flip();
-    }
+    glBegin(GL_TRIANGLES);
+    glColor3f(0f, 0f, 0f);
+    glVertex3f(-0.5f, 0.5f, 0f);
+    glColor3f(0f, 0f, 1f);
+    glVertex3f(-0.5f, -0.5f, 0f);
+    glColor3f(0f, 1f, 1f);
+    glVertex3f(0.5f, -0.5f, 0f);
+    glColor3f(0f, 1f, 1f);
+    glVertex3f(0.5f, -0.5f, 0f);
+    glColor3f(0f, 1f, 0f);
+    glVertex3f(0.5f, 0.5f, 0f);
+    glColor3f(0f, 0f, 0f);
+    glVertex3f(-0.5f, 0.5f, 0f);
+    glEnd();
 
+    glfwSwapBuffers(window);
+    glfwPollEvents();
+
+    width.flip();
+    height.flip();
+  }
+
+  private static void dispose() {
     MemoryUtil.memFree(width);
     MemoryUtil.memFree(height);
 
@@ -97,5 +108,32 @@ public class Main {
     keyCallback.free();
     glfwTerminate();
     errorCallback.free();
+  }
+
+  public static void main(String[] args) {
+    float accumulator = 0f, interval = 1f / 60f, maxFPS = 1f / 60f;
+
+    init();
+
+    while (!glfwWindowShouldClose(window)) {
+      long time = System.nanoTime();
+      float delta = (time - lastLoopTime) / 1000000000f;
+      boolean render = false;
+
+      lastLoopTime = time;
+      accumulator += delta;
+      if (accumulator >= maxFPS) render = true;
+
+      input();
+
+      while (accumulator >= interval) {
+        update(interval);
+        accumulator -= interval;
+      }
+
+      if (render) draw();
+    }
+
+    dispose();
   }
 }
